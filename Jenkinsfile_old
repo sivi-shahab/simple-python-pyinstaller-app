@@ -1,4 +1,4 @@
-// Scripted Pipeline untuk simple-python-pyinstaller-app
+// Scripted Pipeline untuk simple-python-pyinstaller-app dengan Docker
 node {
     // Repository URL lokal
     def repoUrl = '/var/jenkins_projects/submission-cicd-pipeline/simple-python-pyinstaller-app'
@@ -16,40 +16,21 @@ node {
         ])
     }
     
-    // Tahap setup lingkungan Python
-    stage('Setup Environment') {
-        sh 'python -m venv venv || python3 -m venv venv'
-        sh '. venv/bin/activate && pip install --upgrade pip'
-        sh '. venv/bin/activate && pip install -r requirements.txt'
-        // Khusus untuk PyInstaller
-        sh '. venv/bin/activate && pip install pyinstaller'
-    }
-    
-    // Tahap Test (jika ada unit test)
-    stage('Test') {
-        try {
-            sh '. venv/bin/activate && pytest || echo "No tests found"'
-        } catch (Exception e) {
-            echo "Tests failed but continuing pipeline"
-        }
-    }
-    
-    // Tahap Build dengan PyInstaller
-    stage('Build') {
-        // Build executable dengan PyInstaller
-        sh '. venv/bin/activate && pyinstaller --onefile app.py'
+    // Tahap Build dengan Docker
+    stage('Build with Docker') {
+        // Menggunakan Docker image Python untuk menjalankan PyInstaller
+        sh '''
+        docker run --rm -v "$PWD:/app" -w /app python:3.9 /bin/bash -c "
+            pip install -r requirements.txt &&
+            pip install pyinstaller &&
+            pyinstaller --onefile app.py
+        "
+        '''
     }
     
     // Tahap Arsip (menyimpan hasil build)
     stage('Archive') {
         // Menyimpan executable yang dihasilkan
         archiveArtifacts artifacts: 'dist/*', fingerprint: true
-    }
-    
-    // Tahap Cleanup
-    stage('Cleanup') {
-        sh 'rm -rf venv/'
-        sh 'rm -rf build/'
-        sh 'rm -rf __pycache__/'
     }
 }
