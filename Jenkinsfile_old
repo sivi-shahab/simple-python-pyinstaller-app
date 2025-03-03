@@ -1,0 +1,34 @@
+node {
+    def appName = 'pyinstaller-app'
+    
+    stage('Checkout') {
+        // Mengambil kode dari git repository
+        checkout scm
+    }
+    
+    stage('Install Dependencies') {
+        sh 'npm install'
+    }
+    
+    stage('Run Tests') {
+        sh 'npm test -- --watchAll=false'
+    }
+    
+    stage('Build') {
+        sh 'npm run build'
+    }
+    
+    stage('Build Docker Image') {
+        // Membuat image Docker
+        sh "docker build -t ${appName} ."
+    }
+    
+    stage('Run Docker Container') {
+        // Menghentikan container yang berjalan jika ada
+        sh "docker stop ${appName} || true"
+        sh "docker rm ${appName} || true"
+        
+        // Menjalankan container baru
+        sh "docker run -d -p 3000:80 --name ${appName} ${appName}"
+    }
+}
