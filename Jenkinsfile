@@ -37,12 +37,26 @@ pipeline {
             }
         }
 
-        stage('Deploy') {
-            steps {
-                script {
-                    sh 'echo "Deploying to Jenkins workspace: $WORKSPACE"'
-                    sh 'mkdir -p $WORKSPACE/deployment'
-                    sh 'cp -r ./* $WORKSPACE/deployment/'
+    stage('Deploy') {
+    steps {
+        script {
+            // Create the destination directory if it doesn't exist
+            sh 'mkdir -p /var/jenkins_home/workspace/submission-cicd-pipeline-sivialmanafalishahab/deployment'
+            
+            // Copy files and directories, excluding the destination directory itself
+            sh '''
+                cp -r Jenkinsfile README.md docker-compose.yml jenkins nginx-jenkins setting_nginx.md sources \
+                /var/jenkins_home/workspace/submission-cicd-pipeline-sivialmanafalishahab/deployment/
+            '''
+            
+            // If you specifically want to copy the contents of the deployment directory
+            sh '''
+                cp -r deployment/* \
+                /var/jenkins_home/workspace/submission-cicd-pipeline-sivialmanafalishahab/deployment/
+            '''
+            
+            // Verify the contents
+            sh 'ls -la /var/jenkins_home/workspace/submission-cicd-pipeline-sivialmanafalishahab/deployment/'
         }
     }
 }
