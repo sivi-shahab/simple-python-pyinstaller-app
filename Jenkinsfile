@@ -43,6 +43,24 @@ pipeline {
             }
         }
 
+        stage('Manual Approval') {
+            steps {
+                script {
+                    def userInput = input(
+                        message: 'Lanjutkan ke tahap Deploy?',
+                        ok: 'Proceed', // Tombol untuk lanjut ke Deploy
+                        parameters: [
+                            choice(name: 'Konfirmasi', choices: ['Ya', 'Tidak'], description: 'Pilih Ya untuk melanjutkan atau Tidak untuk membatalkan.')
+                        ]
+                    )
+
+                    if (userInput != 'Ya') {
+                        error("Deployment dihentikan oleh pengguna.")
+                    }
+                }
+            }
+        }
+
         stage('Deploy') {
             steps {
                 script {
@@ -62,6 +80,16 @@ pipeline {
 
                     // Verify the contents
                     sh "ls -la ${deployPath}/"
+                }
+            }
+        }
+
+        stage('Wait and Stop') {
+            steps {
+                script {
+                    echo "Application is running... Waiting for 1 minute before stopping."
+                    sh "sleep 60"
+                    echo "Stopping application..."
                 }
             }
         }
