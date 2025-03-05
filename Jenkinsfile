@@ -40,33 +40,12 @@ pipeline {
         stage('Deploy') {
             steps {
                 script {
-                    // Example deployment steps
-                    // 1. Create deployment directory if it doesn't exist
-                    sh 'mkdir -p /opt/myapp'
-
-                    // 2. Copy application files to deployment directory
-                    sh 'cp -r ./* /opt/myapp/'
-
-                    // 3. Set appropriate permissions
-                    sh 'chmod -R 755 /opt/myapp'
-
-                    // 4. Optional: Create a simple startup script
-                    sh '''
-                        echo "#!/bin/bash
-python3 /opt/myapp/main.py" > /opt/myapp/start.sh
-                        chmod +x /opt/myapp/start.sh
-                    '''
-
-                    // 5. Optional: Start the application (remove if not needed)
-                    // Uncomment and modify based on your specific application
-                    // sh '/opt/myapp/start.sh &'
-
-                    // 6. Verification
-                    sh 'ls -l /opt/myapp'
-                    sh 'echo "Deployment completed successfully"'
-                }
-            }
+                    sh 'echo "Deploying to Jenkins workspace: $WORKSPACE"'
+                    sh 'mkdir -p $WORKSPACE/deployment'
+                    sh 'cp -r ./* $WORKSPACE/deployment/'
         }
+    }
+}
     }
 
     post {
